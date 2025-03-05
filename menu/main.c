@@ -32,6 +32,9 @@ void startSession(char name[]){
     //  printf("hmm\n");
       query(args,path); //test
     }
+    else if (strcmp(cmd,"logout")==0){
+      return;
+    }
     else if (strcmp(cmd,"update")==0){
       printf("Update PENDING\n");
       fopen(path,"r");
@@ -59,14 +62,20 @@ int main(){
     printf("%s", prompt);
     scanf("%s %s", command,args);
 
-    if (strcmp(command,"check")==0){ //R U
+    if (strcmp(command,"login")==0){ //R U
       startSession(args);
     }
     else if(strcmp(command,"add")==0){ //C
       //addUser(args);
     }
     else if(strcmp(command,"delete")==0){ //D
-      //requestRemove(args);
+      //reason = requestRemove(args);
+      //syslog(args,reason,"delete account");
+      printf("your request has been sent\n");
+      printf("waiting for approval\n");
+    }
+    else if(strcmp(command, "exit")==0){
+      return 0;
     }
     else {
       printf("No such option exists here...\n");
