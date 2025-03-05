@@ -1,3 +1,7 @@
+//DOESNT WORK SOMEHOW
+/*
+ *
+ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -65,9 +69,7 @@ idk:
 
   printf("\nlen = %d\n", len);
   printf("enter something: ");
-  
-  //input = fgetc(stdin);  // Using fgetc to read the character
-  idek(&input);
+  input = getchar();  // Using fgetc to read the character
   clearInputBuffer();  // Clear the leftover newline character
   
   printf("input = %c\n", input);
