@@ -1,6 +1,6 @@
 #include<stdio.h>
 
-void datalog(name,key,pwd,action);
+void datalog(name,key,pwd,action)
 void syslog(name); //rename of user, delete of user, ...idk
 
 void authLog(char name[10], int success){
