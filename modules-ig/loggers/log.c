@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 
 void datalog(char name[],char key[],char pwd[],char action[]){
   FILE *fp;
@@ -14,7 +15,7 @@ void datalog(char name[],char key[],char pwd[],char action[]){
     fprintf(fp, "%s changed the entry: %s\n", name, key);
   }
   else {
-    printf("????????????\n")
+    printf("????????????\n");
   }
 }
 
@@ -37,7 +38,9 @@ void authLog(char name[10], int success){
     FILE *fp;
     fp = fopen("data/log/serial.txt","a");
     fprintf(fp, "someone atempted to breach %s\n Setting account to locked",name);
-    update("data/log/permit-rules.txt",name,"locked")
+    
+    //PENDING HERE 
+    //update("data/log/permit-rules.txt",name,"locked");
     fclose(fp);
   }
   return;
