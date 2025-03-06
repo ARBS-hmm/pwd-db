@@ -41,21 +41,18 @@ void read(char path[],char searchKey[]){
   return;
 }
 
-void update(char path[], char searchKey[10]){
+void update(char path[], char searchKey[10],char new[10]){
   FILE *tmp;
   FILE *fp;
 
   char key[10];
   char pwd[10];
-  char new[10];
 
   tmp = fopen("tmp.txt","w");
   fp = fopen(path,"r+"); //w+ maybe? // no r+?
 
   while(fscanf(fp, "%s %s\n",key,pwd)==2){
     if (strcmp(key,searchKey)==0){
-      printf("Enter new password\n");
-      scanf("%s",new);
       fprintf(tmp, "%s %s\n",key,new);
     }
     else{

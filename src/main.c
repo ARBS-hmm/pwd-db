@@ -38,7 +38,11 @@ void startSession(char name[]){
     else if (strcmp(cmd,"update")==0){
       printf("Update PENDING\n");
       fopen(path,"r");
-  // 	update(key,path);
+
+      //find(args ig)
+      //term(input);
+      //update(path,key,newentry);
+
       // 	check if it exists ig? and then overwrite it.
       //syslog(name, key, pwd, "user has updated their password");
     }
