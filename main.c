@@ -8,6 +8,16 @@
 #include"include/fileHandlers/user.h"
 
 int query(char path[40], char searchKey[10]);
+
+void get(char path[40], char searchKey[10]){
+  if (query(path,searchKey)==0){
+    printf("No such entry exists\n");
+    printf("consider adding one\n");
+    return;
+  }
+  return;
+};
+
 void startSession(char name[]){
   FILE *fp;
   char path[40];
@@ -37,7 +47,7 @@ void startSession(char name[]){
     scanf("%s %s", cmd, args);
     if (strcmp(cmd,"check")==0){
     //  printf("hmm\n");
-      query(args,path); //test
+      get(path,args); //test
     }
     else if (strcmp(cmd,"logout")==0){
       return;
@@ -53,7 +63,7 @@ void startSession(char name[]){
       }
     }
     else if (strcmp(cmd,"update")==0){
-      printf("Update PENDING\n");
+      //printf("Update PENDING\n");
       printf("Enter new password\n");
       char new[10];
       scanf("%s",new);
@@ -136,3 +146,4 @@ int query(char path[40],char searchKey[10]){
   //printf("consider adding one\n");
   return 0;
 }
+
