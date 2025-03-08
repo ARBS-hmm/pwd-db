@@ -27,6 +27,10 @@ if [ -z "$LIBRARY_FILES" ]; then
   exit 1
 fi
 
+cp $ROOT_DIR/lib/io.so $ROOT_DIR/modules-ig/fileHandlers/
+cp $ROOT_DIR/lib/user.so $ROOT_DIR/modules-ig/fileHandlers/
+echo "Copied the dumb so files"
+
 # Explicitly list the libraries to link (example: -l module1 -l module2)
 # Modify this list based on the actual libraries you have compiled
 echo "Compiling main.c into a single a.out..."
