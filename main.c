@@ -7,13 +7,14 @@
 #include"include/fileHandlers/io.h"
 #include"include/fileHandlers/user.h"
 
-void query(char searchKey[], char path[]);
+int query(char path[40], char searchKey[10]);
 void startSession(char name[]){
   FILE *fp;
-  char path[30];
+  char path[40];
   char extension[10];
   char cmd[10], args[10];
   char key[10];
+  char pwd[10];
 
   strcpy(extension, ".txt");
   strcpy(path, "data/users/");  // Copy "data/users" to path first
@@ -27,11 +28,12 @@ void startSession(char name[]){
     printf("Use \"add <username>\"\n");
     return;
   }
+  fclose(fp);
+
+
   printf("Welcome %s\n", name);
   while(1){
     printf("%s> ",name);
-    //REPL here ig??
-    fclose(fp);
     scanf("%s %s", cmd, args);
     if (strcmp(cmd,"check")==0){
     //  printf("hmm\n");
@@ -40,9 +42,22 @@ void startSession(char name[]){
     else if (strcmp(cmd,"logout")==0){
       return;
     }
+    else if (strcmp(cmd,"add")==0){
+      if (query(path,args)==0){
+	printf("Enter a password\n");
+	scanf("%s",pwd);
+	create(path,args,pwd);
+      }
+      else{
+	printf("this entry already exits.. u need to update it\n");
+      }
+    }
     else if (strcmp(cmd,"update")==0){
       printf("Update PENDING\n");
-      fopen(path,"r");
+      printf("Enter new password\n");
+      char new[10];
+      scanf("%s",new);
+      update(path,args,new);
 
       //find(args ig)
       //term(input);
@@ -52,12 +67,11 @@ void startSession(char name[]){
       //syslog(name, key, pwd, "user has updated their password");
     }
     else if (strcmp(cmd,"del")==0){
-      printf("Delete PENDING\n");
-      fopen(path,"r");
+      delete(path,args);
+      printf("Deleted\n");
     }
     else{
       printf("invalid option try something else...\n");
-      fopen(path,"r");
     }
   }
 }
@@ -94,7 +108,7 @@ int main(){
   return 0;
 }
 
-void query(char searchKey[], char path[]){
+int query(char path[40],char searchKey[10]){
   FILE *fp;
   char key[10];
   char pwd[10];
@@ -102,8 +116,7 @@ void query(char searchKey[], char path[]){
   //printf("path = %s\n", path);
   fp = fopen(path, "r");
   if (fp == NULL){
-    printf("Error\n");
-    exit(1);
+    return 0;
   }
 
   int i=0;
@@ -115,11 +128,11 @@ void query(char searchKey[], char path[]){
       i++;
       //printf("line number = %d\n", i);
       i--;
-      return;
+      return 1;
     };
     i++;
   };
-  printf("No such entry\n");
-  printf("consider adding one\n");
-  return;
+  //printf("No such entry\n");
+  //printf("consider adding one\n");
+  return 0;
 }

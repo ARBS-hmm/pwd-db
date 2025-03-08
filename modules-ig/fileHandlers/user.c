@@ -5,16 +5,19 @@
 
 // users/data
 int checkUserExistence(char name[10]){
-  char path[10];
+  char path[40] = "data/users/";
   char ext[10] = ".txt";
-  strcpy(path,name);
+  strcat(path,name);
   strcat(path,ext);
+
+  printf("checking path = %s\n", path);
 
   FILE *fp;
   fp = fopen(path,"r");
 
-  if (fp = NULL){
-    fclose(fp);
+  if (fp == NULL){
+    //THE FILE NEVER OPENED HERE...
+    //fclose(fp);
     return 0;
   }
   else {
@@ -24,28 +27,43 @@ int checkUserExistence(char name[10]){
 }
 
 void createUser(char name[10]){
-  char path[10];
+
+  char path[40] = "data/users/";
   char ext[10] = ".txt";
-  strcpy(path,name);
+  strcat(path,name);
   strcat(path,ext);
+    printf("path = %s\n", path);
 
-  if (checkUserExistence(name)==1){
-    printf("User already exists\n");
+    if (checkUserExistence(name) == 1) {
+        printf("User already exists\n");
+        return;
+    }
+
+    FILE *fp;
+    fp = fopen(path, "w");
+
+    if (fp == NULL) {
+        printf("Error creating user file\n");
+        return;
+    }
+
+    FILE *log = fopen("data/log/permit-rules.txt", "a");
+    if (log == NULL) {
+        printf("Error opening log file\n");
+        fclose(fp);  // Make sure to close the user file before returning
+        return;
+    }
+
+    char pwd[10];  // Increase size if needed
+    printf("Enter a master password: ");  // Print the prompt correctly
+    scanf("%s", pwd);  // Use "%s" to read a string into pwd
+
+    fprintf(log, "%s %s %s\n", name, pwd, "free");
+    fclose(log);
+
+    printf("User created successfully\n");
+    fclose(fp);
     return;
-  }
-  FILE *fp;
-  fp = fopen(path,"w");
-
-  FILE *log;
-  log = fopen("data/log/permit-rules.txt", "a");
-  char pwd[10];
-  scanf("\nEnter a master password\n",pwd);
-  fprintf(log, "%s %s %s\n",name, pwd,"free");
-  fclose(log);
-
-  printf("Created\n");
-  fclose(fp);
-  return;
 }
 
 void renameUser(char name[10]) {
