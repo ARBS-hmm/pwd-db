@@ -108,7 +108,6 @@ void delete(char path[], char searchKey[]){
   fclose(fp);
   remove("tmp.txt");
   return;
-
 }
 
 int main(){

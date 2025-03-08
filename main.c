@@ -2,6 +2,11 @@
 #include<string.h>
 #include<stdlib.h>
 
+//USER DEFINED HEADERS
+#include"include/display/display.h"
+#include"include/fileHandlers/io.h"
+#include"include/fileHandlers/user.h"
+
 void query(char searchKey[], char path[]);
 void startSession(char name[]){
   FILE *fp;
@@ -70,7 +75,8 @@ int main(){
       startSession(args);
     }
     else if(strcmp(command,"add")==0){ //C
-      //addUser(args);
+      createUser(args);
+      //HERE PENDING
     }
     else if(strcmp(command,"delete")==0){ //D
       //reason = requestRemove(args);

@@ -1,32 +1,36 @@
 #!/run/current-system/sw/bin/zsh
 
-# Define the source directories
-MODULES_IG_DIR="modules-ig"
-LIB_DIR="lib"
 
-# Create the lib directory if it doesn't exist
-mkdir -p $LIB_DIR
+# Set paths for directories
+ROOT_DIR=$(pwd)  # Current directory (root of the project)
+MODULES_DIR="${ROOT_DIR}/modules-ig"
+INCLUDE_DIR="${ROOT_DIR}/include"
+LIB_DIR="${ROOT_DIR}/lib"
 
-# Iterate through each module in modules-ig directory
-for module_dir in $MODULES_IG_DIR/*/; do
-    module_name=$(basename $module_dir)
-    echo "Compiling module: $module_name into shared object (.so) files..."
+# Create lib directory if it doesn't exist
+mkdir -p "$LIB_DIR"
 
-    # Compile all .c files in the module directory into object files (.o)
-    for c_file in $module_dir*.c; do
-        if [[ $c_file == *.c ]]; then
-            # Compile each .c file into an object file (.o)
-            gcc -fPIC -c $c_file -o $LIB_DIR/$(basename $c_file .c).o
-        fi
-    done
-
-    # Link all object files into a shared library (.so)
-    gcc -shared -o $LIB_DIR/lib$module_name.so $LIB_DIR/*.o
-
-    # Clean up object files after creating the .so file
-    rm $LIB_DIR/*.o
-
-    echo "$module_name shared object compiled as $LIB_DIR/lib$module_name.so"
+# Compile all .c files in the modules-ig directory into .so files in the lib directory
+echo "Compiling .c files in ${MODULES_DIR} into .so files..."
+for file in ${MODULES_DIR}/*/*.c; do
+  # Extract filename without extension
+  filename=$(basename "$file" .c)
+  
+  # Compile each .c file into a shared object (.so) file and place it in lib/
+  gcc -shared -fPIC -I "$INCLUDE_DIR" "$file" -o "$LIB_DIR/lib${filename}.so"
 done
 
-echo "All modules compiled into shared objects."
+# Check if any shared libraries exist in the lib directory
+LIBRARY_FILES=$(ls "$LIB_DIR"/lib*.so)
+if [ -z "$LIBRARY_FILES" ]; then
+  echo "No shared libraries found in $LIB_DIR. Exiting."
+  exit 1
+fi
+
+# Explicitly list the libraries to link (example: -l module1 -l module2)
+# Modify this list based on the actual libraries you have compiled
+echo "Compiling main.c into a single a.out..."
+gcc -I "$INCLUDE_DIR" -L "$LIB_DIR" -o "$ROOT_DIR/a.out" "$ROOT_DIR/main.c" -l fileHandlers -l loggers -l user
+
+# Output result
+echo "Build complete. Executable is located in ${ROOT_DIR}/a.out"
