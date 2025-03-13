@@ -55,7 +55,12 @@ void startSession(char name[]){
       get(path,args); //test
     }
     else if (strcmp(cmd,"logout")==0){
-      return;
+      if(strcmp(args,"fast")==0){
+	return;
+      }
+      else{
+	printf("Use \'logout fast\' to exit\n");
+      }
     }
     else if(strcmp(cmd,"change")==0){
       if(strcmp(args,"master")==0){
@@ -99,7 +104,8 @@ void startSession(char name[]){
       }
     }
     else if (strcmp(cmd,"update")==0){
-      printf("Enter new password: ");
+      //printf("Enter new password: ");
+      //WHY IS THIS THING ACTING WEIRD????
       char *current = getpwd(path,args);
       char *new = edit(current);
       update(path, args, new);     
@@ -143,6 +149,7 @@ int main(){
       //HERE PENDING
     }
     else if(strcmp(command,"delete")==0){ //D
+      //PENDING HERE
     }
     else if(strcmp(command, "exit")==0){
       return 0;
