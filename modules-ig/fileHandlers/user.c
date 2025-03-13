@@ -46,21 +46,9 @@ void createUser(char name[10]){
         printf("Error creating user file\n");
         return;
     }
-
-    FILE *log = fopen("data/log/permit-rules.txt", "a");
-    if (log == NULL) {
-        printf("Error opening log file\n");
-        fclose(fp);  // Make sure to close the user file before returning
-        return;
-    }
-
     char pwd[10];  // Increase size if needed
     printf("Enter a master password: ");  // Print the prompt correctly
     scanf("%s", pwd);  // Use "%s" to read a string into pwd
-
-    fprintf(log, "%s %s %s\n", name, pwd, "free");
-    fclose(log);
-
     printf("User created successfully\n");
     fclose(fp);
 
@@ -70,7 +58,7 @@ void createUser(char name[10]){
     return;
 }
 
-void renameHelperig(char path[], char searchKey[10],char new[10]){
+void renameHelperig(char path[], char searchKey[],char new[]){
     FILE *tmp;
     FILE *fp;
 
@@ -78,24 +66,30 @@ void renameHelperig(char path[], char searchKey[10],char new[10]){
     char pwd[10];
   int enabled;
 
+  printf("opening tmp\n");
     tmp = fopen("tmp.txt", "w");
     if (tmp == NULL) {
         printf("Error opening temporary file for writing\n");
         return;
     }
 
-    fp = fopen(path, "r");
+  printf("opening log file\n");
+  printf("path = %s\n", path);
+    //fp = fopen(path, "r");
+  //so this doesnt work for some reason.... why a seg fault?
+    fp = fopen("data/userlist.txt", "r");
     if (fp == NULL) {
         printf("Error opening original file for reading\n");
-        fclose(tmp); // Ensure we close tmp before returning
         return;
     }
+  printf("am i here?\n");
 
-    while (fscanf(fp, "%s %s\n", key, pwd,enabled) == 3) {
+    while (fscanf(fp, "%s %s %d\n", key, pwd,&enabled) == 3) { // & are important... 
         if (strcmp(key, searchKey) == 0) {
-            fprintf(tmp, "%s %s\n", key, new,enabled);
+      printf("im scanning ig\n");
+            fprintf(tmp, "%s %s %d\n", key, new,enabled);
         } else {
-            fprintf(tmp, "%s %s\n", key, pwd,enabled);
+            fprintf(tmp, "%s %s %d\n", key, pwd,enabled);
         }
     }
 
@@ -117,44 +111,54 @@ void renameHelperig(char path[], char searchKey[10],char new[10]){
 
     char ch;
     while ((ch = fgetc(tmp)) != EOF) {
+	//printf("writing\n");
         fputc(ch, fp);
     }
 
     fclose(tmp);
     fclose(fp);
 
-    remove("tmp.txt");
+    //remove("tmp.txt");
     printf("updated successfully\n");
   return;
 };
 
 void renameUser(char name[10]) {
     char newName[10];
-    printf("Enter new name for the user: ");
-    scanf("%s", newName);  // Fixed incorrect use of scanf
 
-    if (checkUserExistence(newName) == 0) {
+    if (checkUserExistence(name) == 0) {
         printf("This user doesnt exists.\n");
         return;
     }
+    printf("Enter new name for the user: ");
+    scanf("%s", newName);  // Fixed incorrect use of scanf
 
-    char oldPath[10];
-    char newPath[10];
+    char oldPath[40];
+    char newPath[40];
     char ext[10] = ".txt";
-    
-    strcpy(oldPath, name);
+    char initial[20] = "data/users/";
+
+    strcpy(oldPath, initial);
+    strcat(oldPath,name);
     strcat(oldPath, ext);
 
-    strcpy(newPath, newName);
+    strcpy(newPath, initial);
+    strcat(newPath,newName);
     strcat(newPath, ext);
 
     if (rename(oldPath, newPath) != 0) {
         printf("Error renaming user\n");
+	printf("oldPath = %s\n", oldPath);
+	printf("newPath = %s\n", newPath);
         return;
     }
+	printf("oldPath = %s\n", oldPath);
+	printf("newPath = %s\n", newPath);
 
-    renameHelperig("data/users/userlist.txt",name,newName); 
+    printf("calling helper\n");
+    renameHelperig("data/userlist.txt",name,newName); 
     printf("User renamed successfully\n");
+  return;
 }
 
 void deleteHelper(char path[],char searchKey[]){

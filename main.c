@@ -110,7 +110,7 @@ void startSession(char name[]){
       char *new = edit(current);
       update(path, args, new);     
     }
-    else if (strcmp(cmd,"del")==0){
+    else if (strcmp(cmd,"delete")==0){
       delete(path,args);
       printf("Deleted\n");
     }
@@ -146,10 +146,12 @@ int main(){
     }
     else if(strcmp(command,"add")==0){ //C
       createUser(args);
-      //HERE PENDING
+    }
+    else if(strcmp(command,"rename")==0){
+      renameUser(args);
     }
     else if(strcmp(command,"delete")==0){ //D
-      //PENDING HERE
+      deleteUser(args);
     }
     else if(strcmp(command, "exit")==0){
       return 0;
