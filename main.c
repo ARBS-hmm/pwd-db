@@ -54,6 +54,14 @@ void startSession(char name[]){
     else if (strcmp(cmd,"logout")==0){
       return;
     }
+    else if(strcmp(cmd,"change")==0){
+      if(strcmp(args,"master")==0){
+	changeMaster(path,name);
+      }
+      else {
+	printf("pls use \'change master\' not what u typed here\n");
+      }
+    }
     else if (strcmp(cmd,"add")==0){
       if (query(path,args)==0){
 	printf("Enter a password\n");
@@ -100,6 +108,7 @@ int main(){
       }
       else{
 	startSession(args);
+	printf("session end\n");
       }
     }
     else if(strcmp(command,"add")==0){ //C

@@ -14,4 +14,6 @@ void renameUser(char name[10]);
 // Function to delete a user (by removing the user file)
 void deleteUser(char name[10]);
 
+void changeMaster(char name[],char new[]);
+
 #endif // USER_H

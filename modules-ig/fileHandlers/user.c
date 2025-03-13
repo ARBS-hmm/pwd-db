@@ -65,7 +65,7 @@ void createUser(char name[10]){
     fclose(fp);
 
     fp = fopen("data/userlist.txt","a");
-  fprintf(fp, "%s %s %d", name, pwd,1); //not 0 here ...
+  fprintf(fp, "%s %s %d\n", name, pwd,1); //not 0 here ...
   fclose(fp);
     return;
 }
@@ -234,3 +234,59 @@ void deleteUser(char name[10]) {
     printf("User deleted successfully\n");
 }
 
+void changeMaster(char name[],char new[]){
+    FILE *tmp;
+    FILE *fp;
+
+    char key[10];
+    char pwd[10];
+  int enabled;
+
+    tmp = fopen("tmp.txt", "w");
+    if (tmp == NULL) {
+        printf("Error opening temporary file for writing\n");
+        return;
+    }
+
+    fp = fopen("data/userlist.txt", "r");
+    if (fp == NULL) {
+        printf("Error opening original file for reading\n");
+        fclose(tmp); // Ensure we close tmp before returning
+        return;
+    }
+
+    while (fscanf(fp, "%s %s %d\n", key, pwd,enabled) == 3) {
+        if (strcmp(key, name) == 0) {
+	    fprintf(tmp, "%s %s %d\n",key,new,enabled);
+        } else {
+            fprintf(tmp, "%s %s %d\n", key, pwd,enabled);
+        }
+    }
+
+    fclose(fp);
+    fclose(tmp);
+
+    fp = fopen("data/userlist.txt", "w");
+    if (fp == NULL) {
+        printf("Error opening original file for writing\n");
+        return;
+    }
+
+    tmp = fopen("tmp.txt", "r");
+    if (tmp == NULL) {
+        printf("Error opening temporary file for reading\n");
+        fclose(fp); // Ensure we close fp before returning
+        return;
+    }
+
+    char ch;
+    while ((ch = fgetc(tmp)) != EOF) {
+        fputc(ch, fp);
+    }
+
+    fclose(tmp);
+    fclose(fp);
+
+    remove("tmp.txt");
+  return;
+}
