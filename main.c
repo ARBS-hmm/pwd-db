@@ -27,6 +27,9 @@ void startSession(char name[]){
   char cmd[10], args[10];
   char key[10];
   char pwd[10];
+  char confirm[10];
+  char newPass[10];
+  //Dont declare things inside a loop.... causes Segmentation faults???
 
   strcpy(extension, ".txt");
   strcpy(path, "data/users/");  // Copy "data/users" to path first
@@ -56,7 +59,30 @@ void startSession(char name[]){
     }
     else if(strcmp(cmd,"change")==0){
       if(strcmp(args,"master")==0){
-	changeMaster(path,name);
+
+	printf("Enter current master password to confirm\n");
+	char master[10];
+	scanf("%s",master);
+	int changecode;
+	changecode = authenticator(name,master);
+	if (changecode ==0){
+	  printf("wrong password entered\n");
+	  goto skipif;
+	}
+	else {
+	  printf("Enter a new password\n");
+	  scanf("%s",newPass);
+	  printf("Confirm by typing again\n");
+	  scanf("%s",confirm);
+	  if(strcmp(newPass,confirm)==0){
+	    printf("Changing\n");
+	    changeMaster(name,newPass);
+	  }
+	  else {
+	    printf("u entered a different pass 2nd time\n Failed\n");
+	    goto skipif;
+	  }
+	}
       }
       else {
 	printf("pls use \'change master\' not what u typed here\n");
@@ -85,6 +111,7 @@ void startSession(char name[]){
     else{
       printf("invalid option try something else...\n");
     }
+  skipif:
   }
 }
 
