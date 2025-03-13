@@ -7,6 +7,7 @@
 #include"include/fileHandlers/io.h"
 #include"include/fileHandlers/user.h"
 #include"include/display/display.h"
+#include"include/security/security.h"
 
 int query(char path[40], char searchKey[10]);
 
@@ -89,7 +90,17 @@ int main(){
     scanf("%s %s", command,args);
 
     if (strcmp(command,"login")==0){ //R U
-      startSession(args);
+      printf("\nEnter your master password:\n");
+      char pwd[10];
+      int code;
+      scanf("%s",pwd);
+      code = authenticator(args,pwd);
+      if (code==0) {
+	printf("U CANT LOGIN\n");
+      }
+      else{
+	startSession(args);
+      }
     }
     else if(strcmp(command,"add")==0){ //C
       createUser(args);
