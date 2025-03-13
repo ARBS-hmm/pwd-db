@@ -6,6 +6,7 @@
 #include"include/display/display.h"
 #include"include/fileHandlers/io.h"
 #include"include/fileHandlers/user.h"
+#include"include/display/display.h"
 
 int query(char path[40], char searchKey[10]);
 
@@ -63,18 +64,10 @@ void startSession(char name[]){
       }
     }
     else if (strcmp(cmd,"update")==0){
-      //printf("Update PENDING\n");
-      printf("Enter new password\n");
-      char new[10];
-      scanf("%s",new);
-      update(path,args,new);
-
-      //find(args ig)
-      //term(input);
-      //update(path,key,newentry);
-
-      // 	check if it exists ig? and then overwrite it.
-      //syslog(name, key, pwd, "user has updated their password");
+      printf("Enter new password: ");
+      char *current = getpwd(path,args);
+      char *new = edit(current);
+      update(path, args, new);     
     }
     else if (strcmp(cmd,"del")==0){
       delete(path,args);
@@ -103,10 +96,6 @@ int main(){
       //HERE PENDING
     }
     else if(strcmp(command,"delete")==0){ //D
-      //reason = requestRemove(args);
-      //syslog(args,reason,"delete account");
-      printf("your request has been sent\n");
-      printf("waiting for approval\n");
     }
     else if(strcmp(command, "exit")==0){
       return 0;

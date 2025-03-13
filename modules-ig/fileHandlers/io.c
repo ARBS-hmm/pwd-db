@@ -2,7 +2,33 @@
 #include<string.h>
 #include<stdlib.h>
 
-//all begin in closed state
+char* getpwd(char path[], char searchKey[]) {
+    FILE *fp;
+    char key[10];
+    char pwd[10];
+
+    fp = fopen(path, "r");
+    if (fp == NULL) {
+        printf("Error\n");
+        exit(1);
+    }
+
+    while (fscanf(fp, "%s %s\n", key, pwd) == 2) {
+        if (strcmp(key, searchKey) == 0) {
+            // Dynamically allocate memory for the password and return it
+            char *password = malloc(strlen(pwd) + 1);
+            if (password != NULL) {
+                strcpy(password, pwd);
+                fclose(fp);
+                return password; // Return the password
+            }
+        }
+    }
+
+    fclose(fp);
+    return NULL; // If not found, return NULL
+}
+
 void create(char path[],char key[], char pwd[]){
   FILE *fp;
   fp =fopen(path,"a");
@@ -11,7 +37,7 @@ void create(char path[],char key[], char pwd[]){
   return;
 }
 
-void read(char path[],char searchKey[]){
+void readit(char path[],char searchKey[]){
   FILE *fp;
   char key[10];
   char pwd[10];

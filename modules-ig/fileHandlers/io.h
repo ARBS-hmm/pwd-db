@@ -1,11 +1,11 @@
 #ifndef IO_H
 #define IO_H
 
-// Function to create an entry in the password file
+char* getpwd(char path[], char searchKey[]);
 void create(char path[], char key[], char pwd[]);
 
 // Function to read an entry from the password file
-void read(char path[], char searchKey[]);
+void readit(char path[], char searchKey[]);
 
 // Function to update the password for an existing entry
 void update(char path[], char searchKey[10], char new[10]);
