@@ -6,7 +6,6 @@
 #include"include/display/display.h"
 #include"include/fileHandlers/io.h"
 #include"include/fileHandlers/user.h"
-#include"include/display/display.h"
 #include"include/security/security.h"
 
 int query(char path[40], char searchKey[10]);
