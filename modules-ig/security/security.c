@@ -1,74 +1,68 @@
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
-int authLog(char name[10], int success){
-  static int tries=0;
-
-  printf("tries = %d\n", tries);
-  if (success==1){
-    int tries =0;
-    return 1;
-  }
-  else if (success == 0){
-    tries++;
-    printf("tries now = %d\n", tries);
-  }
-
-  return tries;
-};
-
-void disableAccount(const char *username) {
-    FILE *fp, *tempFile;
-    char file_username[50];
-    char file_password[50];
+// Define a structure for user credentials
+typedef struct {
+    char username[50];
+    char password[50];
     int enabled;
+} User;
 
-    fp = fopen("data/userlist.txt", "r");
+// Function to log authentication attempts
+int authLog(char name[10], int success) {
+    static int tries = 0;
+
+    printf("tries = %d\n", tries);
+    if (success == 1) {
+        tries = 0; // Reset tries on successful authentication
+        return 1;
+    } else if (success == 0) {
+        tries++;
+        printf("tries now = %d\n", tries);
+    }
+
+    return tries;
+}
+
+// Function to disable an account
+void disableAccount(const char *username) {
+    FILE *fp = fopen("data/userlist.bin", "rb+");
     if (fp == NULL) {
         printf("Error: Unable to open user credentials file.\n");
         return;
     }
 
-    tempFile = fopen("data/temp.txt", "w");
-    if (tempFile == NULL) {
-        printf("Error: Unable to open temporary file.\n");
-        fclose(fp);
-        return;
-    }
+    User user;
+    long pos = 0;
 
-    // Read the userlist file and update the disabled status
-    while (fscanf(fp, "%s %s %d", file_username, file_password, &enabled) == 3) {
-        if (strcmp(username, file_username) == 0) {
-            fprintf(tempFile, "%s %s %d\n", file_username, file_password, 0); // Disable account
-        } else {
-            fprintf(tempFile, "%s %s %d\n", file_username, file_password, enabled);
+    // Find the user and update their status
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(username, user.username) == 0) {
+            user.enabled = 0; // Disable the account
+            fseek(fp, pos, SEEK_SET); // Move back to the start of the record
+            fwrite(&user, sizeof(User), 1, fp); // Overwrite the record
+            break;
         }
+        pos = ftell(fp); // Save the current position
     }
 
     fclose(fp);
-    fclose(tempFile);
-
-    // Replace the original file with the updated file
-    remove("data/userlist.txt");
-    rename("data/temp.txt", "data/userlist.txt");
 }
 
-int authenticator(char *username,char *password) {
-    FILE *fp;
-    char file_username[50];
-    char file_password[50];
-    int enabled;
-
-    fp = fopen("data/userlist.txt", "r");
+// Function to authenticate a user
+int authenticator(char *username, char *password) {
+    FILE *fp = fopen("data/userlist.bin", "rb");
     if (fp == NULL) {
         printf("Error: Unable to open user credentials file.\n");
         return 0; // Failure
     }
 
-    // Find the entry
+    User user;
     int found = 0;
-    while (fscanf(fp, "%s %s %d", file_username, file_password, &enabled) == 3) {
-        if (strcmp(username, file_username) == 0) {
+
+    // Read users from the binary file
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(username, user.username) == 0) {
             found = 1;
             break;
         }
@@ -80,16 +74,15 @@ int authenticator(char *username,char *password) {
         return 0; // Failure
     }
 
-    if (enabled == 0) {
+    if (user.enabled == 0) {
         printf("Account Disabled\n");
         fclose(fp);
         return 0; // Failure
     }
 
-    if (strcmp(file_password, password) != 0) {
+    if (strcmp(user.password, password) != 0) {
         printf("Wrong password\n");
-	int tries;
-        tries = authLog(username, 0);
+        int tries = authLog(username, 0);
         if (tries == 5) {
             // Log the breach attempt
             FILE *logFile = fopen("data/log/security-warnings.txt", "a");
@@ -107,16 +100,27 @@ int authenticator(char *username,char *password) {
     }
 
     // Successful authentication
-  int tmp;
-  tmp = authLog(username, 1); // Reset tries
-  fclose(fp);
-  return 1; // Success
+    int tmp = authLog(username, 1); // Reset tries
+    fclose(fp);
+    return 1; // Success
 }
 
-//before login ig?
-//serial.txt write
+// Function to create a sample userlist.bin file (for testing)
+void createUserFile() {
+    FILE *fp = fopen("data/userlist.bin", "wb");
+    if (fp == NULL) {
+        perror("Error creating user file");
+        return;
+    }
 
-int main(){
-  return 0;
+    User users[] = {
+        {"user1", "password1", 1},
+        {"user2", "password2", 1},
+        {"user3", "password3", 0} // Disabled account
+    };
+
+    size_t num_users = sizeof(users) / sizeof(users[0]);
+    fwrite(users, sizeof(User), num_users, fp);
+
+    fclose(fp);
 }
-

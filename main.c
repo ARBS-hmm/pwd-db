@@ -8,7 +8,33 @@
 #include"include/fileHandlers/user.h"
 #include"include/security/security.h"
 
-int query(char path[40], char searchKey[10]);
+int query(const char *path, const char *searchKey) {
+    FILE *fp = fopen(path, "rb"); // Open the file in read binary mode
+    if (fp == NULL) {
+        printf("Error: Unable to open file for reading.\n");
+        return 0; // File could not be opened
+    }
+
+    User user;
+    int found = 0;
+
+    // Read the file record by record
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(user.username, searchKey) == 0) {
+      //      printf("Password for user '%s': %s\n", user.username, user.password);
+            found = 1;
+            break; // Exit the loop once the user is found
+        }
+    }
+
+    fclose(fp); // Close the file
+
+    if (!found) {
+        printf("No such entry found for user '%s'.\n", searchKey);
+    }
+
+    return found; // Return 1 if found, 0 otherwise
+}
 
 void get(char path[40], char searchKey[10]){
   if (query(path,searchKey)==0){
@@ -30,7 +56,7 @@ void startSession(char name[]){
   char newPass[10];
   //Dont declare things inside a loop.... causes Segmentation faults???
 
-  strcpy(extension, ".txt");
+  strcpy(extension, ".bin");
   strcpy(path, "data/users/");  // Copy "data/users" to path first
   strcat(path, name);          // Then concatenate the name to it
   strcat(path,extension);
@@ -51,7 +77,7 @@ void startSession(char name[]){
     scanf("%s %s", cmd, args);
     if (strcmp(cmd,"check")==0){
     //  printf("hmm\n");
-      get(path,args); //test
+      readit(path,args); //test
     }
     else if (strcmp(cmd,"logout")==0){
       if(strcmp(args,"fast")==0){
@@ -130,6 +156,10 @@ int main(){
     scanf("%s %s", command,args);
 
     if (strcmp(command,"login")==0){ //R U
+      if (query("data/userlist.bin",args)==0){
+	printf("User doesnt exist....\n");
+	continue;
+      }
       printf("\nEnter your master password:\n");
       char pwd[10];
       int code;
@@ -159,35 +189,6 @@ int main(){
       printf("No such option exists here...\n");
     }
   }
-  return 0;
-}
-
-int query(char path[40],char searchKey[10]){
-  FILE *fp;
-  char key[10];
-  char pwd[10];
-
-  //printf("path = %s\n", path);
-  fp = fopen(path, "r");
-  if (fp == NULL){
-    return 0;
-  }
-
-  int i=0;
-  //CHECK IF THE FILE IS EMPTY FIRST HERE......
-  while(fscanf(fp,"%s %s\n",key,pwd)==2){
-    //printf("key = %s\n", key);
-    if (strcmp(key,searchKey)==0){
-      printf("password: %s\n", pwd);
-      i++;
-      //printf("line number = %d\n", i);
-      i--;
-      return 1;
-    };
-    i++;
-  };
-  //printf("No such entry\n");
-  //printf("consider adding one\n");
   return 0;
 }
 

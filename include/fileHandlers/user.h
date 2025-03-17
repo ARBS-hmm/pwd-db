@@ -1,19 +1,20 @@
-
 #ifndef USER_H
 #define USER_H
 
-// Function to check if a user exists by checking the corresponding file
-int checkUserExistence(char name[10]);
+#include <stdio.h>
 
-// Function to create a user (by creating a file and logging credentials)
-void createUser(char name[10]);
+// Define the User structure
+typedef struct {
+    char username[50];   // Username of the user
+    char password[50];   // Password of the user
+    int enabled;         // User account status (1 = enabled, 0 = disabled)
+} User;
 
-// Function to rename an existing user
-void renameUser(char name[10]);
-
-// Function to delete a user (by removing the user file)
-void deleteUser(char name[10]);
-
-void changeMaster(char name[],char new[]);
+// Function prototypes
+int checkUserExistence(const char *name);
+void createUser(const char *name);
+void renameUser(const char name[]);
+void deleteUser(const char *name);
+void changeMaster(const char *name, const char *newPassword);
 
 #endif // USER_H

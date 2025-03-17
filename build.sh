@@ -33,7 +33,7 @@ fi
 # Explicitly list the libraries to link (example: -l module1 -l module2)
 # Modify this list based on the actual libraries you have compiled
 echo "Compiling main.c into a single a.out..."
-gcc -I "$INCLUDE_DIR" -L "$LIB_DIR" -o "$ROOT_DIR/a.out" "$ROOT_DIR/main.c" -l io -l user -l display -l log
+gcc -I "$INCLUDE_DIR" -L "$LIB_DIR" -o "$ROOT_DIR/a.out" "$ROOT_DIR/main.c" -l io -l user -l display -l security
 
 # Output result
 echo "Build complete. Executable is located in ${ROOT_DIR}/a.out"

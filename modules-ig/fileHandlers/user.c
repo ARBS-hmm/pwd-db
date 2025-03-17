@@ -1,230 +1,132 @@
 #include <stdio.h>
 #include <string.h>
+#include "io.h"
 
-#include"io.h"
+typedef struct {
+    char username[50];   // Username of the user
+    char password[50];   // Password of the user
+    int enabled;         // User account status (1 = enabled, 0 = disabled)
+} User;
 
-// users/data
-int checkUserExistence(char name[10]){
-  char path[40] = "data/users/";
-  char ext[10] = ".txt";
-  strcat(path,name);
-  strcat(path,ext);
+// Check if a user exists
+int checkUserExistence(const char *name) {
+    char path[40] = "data/users/";
+    char ext[10] = ".bin";
+    strcat(path, name);
+    strcat(path, ext);
 
-  printf("checking path = %s\n", path);
-
-  FILE *fp;
-  fp = fopen(path,"r");
-
-  if (fp == NULL){
-    //THE FILE NEVER OPENED HERE...
-    //fclose(fp);
-    return 0;
-  }
-  else {
+    FILE *fp = fopen(path, "rb");
+    if (fp == NULL) {
+        return 0; // User does not exist
+    }
     fclose(fp);
-    return 1;
-  }
+    return 1; // User exists
 }
 
-void createUser(char name[10]){
+// Create a new user
+void createUser(const char *name) {
+    char path[40] = "data/users/";
+    char ext[10] = ".bin";
+    strcat(path, name);
+    strcat(path, ext);
 
-  char path[40] = "data/users/";
-  char ext[10] = ".txt";
-  strcat(path,name);
-  strcat(path,ext);
-    printf("path = %s\n", path);
-
-    if (checkUserExistence(name) == 1) {
+    if (checkUserExistence(name)) {
         printf("User already exists\n");
         return;
     }
 
-    FILE *fp;
-    fp = fopen(path, "w");
-
+    FILE *fp = fopen(path, "wb");
     if (fp == NULL) {
         printf("Error creating user file\n");
         return;
     }
-    char pwd[10];  // Increase size if needed
-    printf("Enter a master password: ");  // Print the prompt correctly
-    scanf("%s", pwd);  // Use "%s" to read a string into pwd
-    printf("User created successfully\n");
-    fclose(fp);
 
-    fp = fopen("data/userlist.txt","a");
-  fprintf(fp, "%s %s %d\n", name, pwd,1); //not 0 here ...
-  fclose(fp);
-    return;
+    char pwd[50]; // Increased size for better security
+    printf("Enter a master password: ");
+    scanf("%s", pwd);
+
+    // Add the user to the userlist
+    User newUser;
+    strncpy(newUser.username, name, sizeof(newUser.username));
+    strncpy(newUser.password, pwd, sizeof(newUser.password));
+    newUser.enabled = 1; // Enabled by default
+
+    FILE *userlist = fopen("data/userlist.bin", "ab");
+    if (userlist == NULL) {
+        printf("Error opening userlist file\n");
+        fclose(fp);
+        return;
+    }
+    fwrite(&newUser, sizeof(User), 1, userlist);
+    fclose(userlist);
+
+    fclose(fp);
+    printf("User created successfully\n");
 }
 
-void renameHelperig(char path[], char searchKey[],char new[]){
-    FILE *tmp;
-    FILE *fp;
+// Rename a user
+void renameUser(const char name[]) {
+    char newName[50];
 
-    char key[10];
-    char pwd[10];
-  int enabled;
-
-  printf("opening tmp\n");
-    tmp = fopen("tmp.txt", "w");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for writing\n");
+    if (!checkUserExistence(name)) {
+        printf("This user doesn't exist.\n");
         return;
     }
 
-  printf("opening log file\n");
-  printf("path = %s\n", path);
-    //fp = fopen(path, "r");
-  //so this doesnt work for some reason.... why a seg fault?
-    fp = fopen("data/userlist.txt", "r");
-    if (fp == NULL) {
-        printf("Error opening original file for reading\n");
-        return;
-    }
-  printf("am i here?\n");
-
-    while (fscanf(fp, "%s %s %d\n", key, pwd,&enabled) == 3) { // & are important... 
-        if (strcmp(key, searchKey) == 0) {
-      printf("im scanning ig\n");
-            fprintf(tmp, "%s %s %d\n", key, new,enabled);
-        } else {
-            fprintf(tmp, "%s %s %d\n", key, pwd,enabled);
-        }
-    }
-
-    fclose(fp);
-    fclose(tmp);
-
-    fp = fopen(path, "w");
-    if (fp == NULL) {
-        printf("Error opening original file for writing\n");
-        return;
-    }
-
-    tmp = fopen("tmp.txt", "r");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for reading\n");
-        fclose(fp); // Ensure we close fp before returning
-        return;
-    }
-
-    char ch;
-    while ((ch = fgetc(tmp)) != EOF) {
-	//printf("writing\n");
-        fputc(ch, fp);
-    }
-
-    fclose(tmp);
-    fclose(fp);
-
-    //remove("tmp.txt");
-    printf("updated successfully\n");
-  return;
-};
-
-void renameUser(char name[10]) {
-    char newName[10];
-
-    if (checkUserExistence(name) == 0) {
-        printf("This user doesnt exists.\n");
-        return;
-    }
     printf("Enter new name for the user: ");
-    scanf("%s", newName);  // Fixed incorrect use of scanf
+    scanf("%s", newName);
 
     char oldPath[40];
     char newPath[40];
-    char ext[10] = ".txt";
+    char ext[10] = ".bin";
     char initial[20] = "data/users/";
 
     strcpy(oldPath, initial);
-    strcat(oldPath,name);
+    strcat(oldPath, name);
     strcat(oldPath, ext);
 
     strcpy(newPath, initial);
-    strcat(newPath,newName);
+    strcat(newPath, newName);
     strcat(newPath, ext);
 
     if (rename(oldPath, newPath) != 0) {
         printf("Error renaming user\n");
-	printf("oldPath = %s\n", oldPath);
-	printf("newPath = %s\n", newPath);
         return;
     }
-	printf("oldPath = %s\n", oldPath);
-	printf("newPath = %s\n", newPath);
 
-    printf("calling helper\n");
-    renameHelperig("data/userlist.txt",name,newName); 
+    // Update the userlist
+    FILE *fp = fopen("data/userlist.bin", "rb");
+    FILE *tmp = fopen("tmp.bin", "wb");
+    if (fp == NULL || tmp == NULL) {
+        printf("Error updating userlist\n");
+        return;
+    }
+
+    User user;
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(user.username, name) == 0) {
+            strncpy(user.username, newName, sizeof(user.username));
+        }
+        fwrite(&user, sizeof(User), 1, tmp);
+    }
+
+    fclose(fp);
+    fclose(tmp);
+
+    remove("data/userlist.bin");
+    rename("tmp.bin", "data/userlist.bin");
+
     printf("User renamed successfully\n");
-  return;
 }
 
-void deleteHelper(char path[],char searchKey[]){
-    FILE *tmp;
-    FILE *fp;
-
-    char key[10];
-    char pwd[10];
-  int enabled;
-
-    tmp = fopen("tmp.txt", "w");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for writing\n");
-        return;
-    }
-
-    fp = fopen(path, "r");
-    if (fp == NULL) {
-        printf("Error opening original file for reading\n");
-        fclose(tmp); // Ensure we close tmp before returning
-        return;
-    }
-
-    while (fscanf(fp, "%s %s\n", key, pwd,enabled) == 3) {
-        if (strcmp(key, searchKey) == 0) {
-      // Nothing to do here...
-        } else {
-            fprintf(tmp, "%s %s\n", key, pwd,enabled);
-        }
-    }
-
-    fclose(fp);
-    fclose(tmp);
-
-    fp = fopen(path, "w");
-    if (fp == NULL) {
-        printf("Error opening original file for writing\n");
-        return;
-    }
-
-    tmp = fopen("tmp.txt", "r");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for reading\n");
-        fclose(fp); // Ensure we close fp before returning
-        return;
-    }
-
-    char ch;
-    while ((ch = fgetc(tmp)) != EOF) {
-        fputc(ch, fp);
-    }
-
-    fclose(tmp);
-    fclose(fp);
-
-    remove("tmp.txt");
-  return;
-};
-
-void deleteUser(char name[10]) {
-    char path[10];
-    char ext[10] = ".txt";
-    strcpy(path, name);
+// Delete a user
+void deleteUser(const char *name) {
+    char path[40] = "data/users/";
+    char ext[10] = ".bin";
+    strcat(path, name);
     strcat(path, ext);
 
-    if (checkUserExistence(name) == 0) {
+    if (!checkUserExistence(name)) {
         printf("User does not exist\n");
         return;
     }
@@ -234,63 +136,51 @@ void deleteUser(char name[10]) {
         return;
     }
 
-    deleteHelper("data/userlist.txt",name);
-    printf("User deleted successfully\n");
-}
-
-void changeMaster(char name[],char new[]){
-    FILE *tmp;
-    FILE *fp;
-
-    char key[10];
-    char pwd[10];
-  int enabled;
-
-    tmp = fopen("tmp.txt", "w");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for writing\n");
+    // Update the userlist
+    FILE *fp = fopen("data/userlist.bin", "rb");
+    FILE *tmp = fopen("tmp.bin", "wb");
+    if (fp == NULL || tmp == NULL) {
+        printf("Error updating userlist\n");
         return;
     }
 
-    fp = fopen("data/userlist.txt", "r");
-    if (fp == NULL) {
-        printf("Error opening original file for reading\n");
-        fclose(tmp); // Ensure we close tmp before returning
-        return;
-    }
-
-    while (fscanf(fp, "%s %s %d\n", key, pwd,enabled) == 3) {
-        if (strcmp(key, name) == 0) {
-	    fprintf(tmp, "%s %s %d\n",key,new,enabled);
-        } else {
-            fprintf(tmp, "%s %s %d\n", key, pwd,enabled);
+    User user;
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(user.username, name) != 0) {
+            fwrite(&user, sizeof(User), 1, tmp);
         }
     }
 
     fclose(fp);
     fclose(tmp);
 
-    fp = fopen("data/userlist.txt", "w");
+    remove("data/userlist.bin");
+    rename("tmp.bin", "data/userlist.bin");
+
+    printf("User deleted successfully\n");
+}
+
+// Change the master password
+void changeMaster(const char *name, const char *newPassword) {
+    FILE *fp = fopen("data/userlist.bin", "rb+");
     if (fp == NULL) {
-        printf("Error opening original file for writing\n");
+        printf("Error opening userlist file\n");
         return;
     }
 
-    tmp = fopen("tmp.txt", "r");
-    if (tmp == NULL) {
-        printf("Error opening temporary file for reading\n");
-        fclose(fp); // Ensure we close fp before returning
-        return;
+    User user;
+    long pos = 0;
+
+    while (fread(&user, sizeof(User), 1, fp) == 1) {
+        if (strcmp(user.username, name) == 0) {
+            strncpy(user.password, newPassword, sizeof(user.password));
+            fseek(fp, pos, SEEK_SET); // Move back to the start of the record
+            fwrite(&user, sizeof(User), 1, fp); // Overwrite the record
+            break;
+        }
+        pos = ftell(fp); // Save the current position
     }
 
-    char ch;
-    while ((ch = fgetc(tmp)) != EOF) {
-        fputc(ch, fp);
-    }
-
-    fclose(tmp);
     fclose(fp);
-
-    remove("tmp.txt");
-  return;
+    printf("Master password changed successfully\n");
 }
